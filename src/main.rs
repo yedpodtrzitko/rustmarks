@@ -53,12 +53,14 @@ fn main() {
                     println!("{}", target.as_str().unwrap());
                 }
                 None => {
-                    println!("target dir not found for alias: {}", alias);
+                    eprintln!("target dir not found for alias: {}", alias);
+                    exit(1)
                 }
             }
         }
         _ => {
             eprintln!("unknown command {}", command);
+            exit(1)
         }
     }
 }
