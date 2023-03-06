@@ -5,24 +5,25 @@ use toml;
 mod config;
 
 fn main() {
-    const CONFIG_PATH: &str = "~/bin/rustmarks.toml";
+    let config_path: &str = "~/bin/rustmarks.toml";
+    let final_path = config::expand_path(&config_path);
 
     let args: Vec<String> = env::args().collect();
 
     let args_len = args.len();
     if args_len < 2 {
-        println!("not enough args {:?}", args);
-        return;
+        eprintln!("not enough args {:?}", args);
+        exit(1);
     }
 
-    let mut cfg = config::load_items(CONFIG_PATH);
+    let mut cfg = config::load_items(&final_path);
 
     let command = args.get(1).unwrap();
     match command.as_str() {
         "add" => {
             if args_len != 3 {
-                println!("wrong number or params for `add`");
-                return;
+                eprintln!("wrong number or params for `add`");
+                exit(1);
             }
 
             let alias = args.get(2).unwrap();
@@ -32,20 +33,32 @@ fn main() {
                 Ok(dir) => {
                     cfg.items.insert(alias.clone(), toml::Value::String(dir.into_os_string().into_string().unwrap()));
 
-                    config::save_items(CONFIG_PATH, &cfg);
-
+                    config::save_items(&final_path, &cfg);
                 }
                 Err(e) => {
-                    println!("error adding current directory {}", e);
+                    eprintln!("error adding current directory {}", e);
                     exit(1);
                 }
             }
         }
+        "jump" => {
+            if args_len != 3 {
+                eprintln!("wrong number or params for `jump`");
+                exit(1);
+            }
+
+            let alias = args.get(2).unwrap();
+            match cfg.items.get(alias) {
+                Some(target) => {
+                    println!("{}", target.as_str().unwrap());
+                }
+                None => {
+                    println!("target dir not found for alias: {}", alias);
+                }
+            }
+        }
         _ => {
-            println!("unknown command {}", command  );
+            eprintln!("unknown command {}", command);
         }
     }
-
-
-    println!("items {}", cfg.items);
 }
