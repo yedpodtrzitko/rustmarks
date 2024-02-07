@@ -5,29 +5,23 @@ use toml;
 mod config;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
     let config_path: &str = "~/bin/rustmarks.toml";
     let final_path = config::expand_path(&config_path);
-
-    let args: Vec<String> = env::args().collect();
-
-    let args_len = args.len();
-    if args_len < 2 {
-        eprintln!("not enough args {:?}", args);
-        exit(1);
-    }
-
     let mut cfg = config::load_items(&final_path);
 
-    let command = args.get(1).unwrap();
-    match command.as_str() {
-        "add" => {
-            if args_len != 3 {
-                eprintln!("wrong number or params for `add`");
+    match args.get(1).map(String::as_str) {
+        Some("list") => {
+            println!("{}", cfg.items);
+        }
+        Some("add") => {
+            if args.len() != 3 {
+                eprintln!("Wrong number or params for `add`.");
                 exit(1);
             }
 
             let alias = args.get(2).unwrap();
-            println!("adding alias {}", alias);
+            println!("Adding alias: {}", alias);
 
             match env::current_dir() {
                 Ok(dir) => {
@@ -41,8 +35,8 @@ fn main() {
                 }
             }
         }
-        "jump" => {
-            if args_len != 3 {
+        Some("jump") => {
+            if args.len() != 3 {
                 eprintln!("wrong number or params for `jump`");
                 exit(1);
             }
@@ -59,7 +53,7 @@ fn main() {
             }
         }
         _ => {
-            eprintln!("unknown command {}", command);
+            eprintln!("Expected arguments: 'add' / 'jump' / 'list', found: {:?}", args);
             exit(1)
         }
     }

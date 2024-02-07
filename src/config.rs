@@ -25,7 +25,7 @@ pub fn load_items(config_path: &str) -> Config {
     let contents = match fs::read_to_string(&config_path) {
         Ok(c) => c,
         Err(err) => {
-            eprintln!("Could not read config file `{}`: {}", config_path.clone(), err);
+            eprintln!("Could not read config file `{}`: {}", config_path, err);
             exit(1);
         }
     };
@@ -33,7 +33,7 @@ pub fn load_items(config_path: &str) -> Config {
     let config: Config = match toml::from_str(&contents) {
         Ok(d) => d,
         Err(err) => {
-            eprintln!("Unable to load data from `{}`: {}", config_path.clone(), err);
+            eprintln!("Unable to load data from `{}`: {}", config_path, err);
             exit(1);
         }
     };
